@@ -1,0 +1,45 @@
+{
+  "name": "cb-cloud-benchmark",
+  "version": "0.2.0",
+  "description": "Cloud Benchmark which loads and accesses data from a Couchbase cluster",
+  "main": "index.js",
+  "scripts": {
+    "eslint": "eslint .",
+    "babel": "babel src --out-dir dist --source-maps",
+    "build": "npm run babel",
+    "clean": "rm -rvf dist",
+    "test": "npm run build && npm run eslint",
+    "start": "node ./dist/bin/cloud-benchmark",
+    "prepublish": "npm run clean && npm run babel"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/corbinu/cb-cloud-benchmark.git"
+  },
+  "preferGlobal": "true",
+  "bin": {
+    "cloud-benchmark": "./dist/bin/cloud-benchmark.js"
+  },
+  "author": {
+    "name": "Corbin Uselton",
+    "email": "corbinu@decimal.io"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "JSONStream": "^0.10.0",
+    "chance": "^0.7.3",
+    "concat": "^1.0.0",
+    "couchbase": "^2.0.7",
+    "del": "^1.1.1",
+    "fs-extra": "^0.18.0",
+    "lodash": "^3.6.0",
+    "progress": "^1.1.8",
+    "source-map-support": "^0.2.10",
+    "yargs": "^3.7.0"
+  },
+  "devDependencies": {
+    "code": "^1.4.0",
+    "babel": "^5.0.12",
+    "eslint": "^0.18.0"
+  }
+}
