@@ -1,6 +1,7 @@
 import _ from "lodash";
 import yargs from "yargs";
 import del from "del";
+import path from "path";
 import ProgressBar from "progress";
 import { install } from "source-map-support";
 
@@ -144,7 +145,7 @@ export default function (cluster) {
 			})
 			.option("d", {
 				"alias": "dir",
-				"default": "./data",
+				"default": path.resolve(__dirname, "./data"),
 				"describe": "directory to use",
 				"type": "string"
 			})

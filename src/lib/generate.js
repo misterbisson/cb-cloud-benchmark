@@ -47,7 +47,6 @@ export default function (num, dir, docs=600000, progress=new Progress()) {
 	owners = _.uniq(owners, "id");
 
 	fs.writeFile(`${dir}/generated_docs_${num}.json`, JSON.stringify({"owners": owners}), (err) => {
-
 		if (err) return console.log(err);
 
 		progress.end();

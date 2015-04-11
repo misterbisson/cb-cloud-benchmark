@@ -43,7 +43,7 @@ export default function (original, to, dir) {
 
 		return new Promise((resolve, reject) => {
 
-			del(["${dir}/generated_docs_*.json"], (err) => {
+			del([`${dir}/generated_docs_*.json`], (err) => {
 				if (err) return reject(err);
 
 				resolve();
@@ -51,6 +51,7 @@ export default function (original, to, dir) {
 		});
 
 	}, (err) => {
+		console.log(err);
 		throw err;
 	}).then(() => {
 
@@ -71,14 +72,24 @@ export default function (original, to, dir) {
 		return Promise.all(moves);
 
 	}, (err) => {
+		console.log(err);
 		throw err;
 	}).then(() => {
 
-		del(["${dir}/concatenation_docs_*.json"], (err) => {
-			if (err) throw err;
+		del([`${dir}/concatenation_docs_*.json`], (err) => {
+			if (err) {
+				console.log(err);
+				throw err;
+			}
 
 			console.log("completed");
 		});
+	}, (err) => {
+		console.log(err);
+		throw err;
+	}).catch((err) => {
+		console.log(err);
+		throw err;
 	});
 
 }

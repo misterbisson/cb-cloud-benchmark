@@ -58,7 +58,8 @@ export default function (num, uri, dir, loadProgress) {
 
 				});
 			}, (err) => {
-				return err;
+				console.log(err);
+				throw err;
 			});
 		});
 
@@ -69,8 +70,10 @@ export default function (num, uri, dir, loadProgress) {
 			process.exit(0);
 
 		}, (err) => {
+			console.log(err);
 			throw err;
 		}).catch((err) => {
+			console.log(err);
 			throw err;
 		});
 	});
