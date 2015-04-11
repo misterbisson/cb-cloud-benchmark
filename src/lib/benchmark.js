@@ -1,6 +1,7 @@
 import fs from "fs";
-import JSONStream from "JSONStream";
 import _ from "lodash";
+import JSONStream from "JSONStream";
+import { ViewQuery } from "couchbase";
 
 import connect from "./connect";
 
@@ -67,7 +68,89 @@ export default function (num, dir, uri, loadProgress) {
 
 			loadProgress.end();
 
-			process.exit(0);
+			return new Promise((resolve, reject) => {
+
+				console.log("query people with SUVs");
+
+				let start = new Date();
+
+				let vq = ViewQuery.from("benchmark", "withSUVs");
+
+				vq.stale(ViewQuery.Update.BEFORE);
+
+				bucket.query(vq, (err, results) => {
+					if (err) return reject(err);
+
+					let end = new Date();
+
+					console.log(`people with SUVs in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
+
+					return resolve(results);
+				});
+
+			});
+
+		}, (err) => {
+			console.log(err);
+			throw err;
+		}).then(() => {
+
+			loadProgress.end();
+
+			return new Promise((resolve, reject) => {
+
+				console.log("query number of convertibles");
+
+				let start = new Date();
+
+				let vq = ViewQuery.from("benchmark", "numConvertibles");
+
+				vq.stale(ViewQuery.Update.BEFORE);
+
+				bucket.query(vq, (err, results) => {
+					if (err) return reject(err);
+
+					let end = new Date();
+
+					console.log(`number of convertibles: ${results[0].value}`);
+
+					console.log(`number of convertibles in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
+
+					return resolve(results);
+				});
+
+			});
+
+		}, (err) => {
+			console.log(err);
+			throw err;
+		}).then(() => {
+
+			loadProgress.end();
+
+			return new Promise((resolve, reject) => {
+
+				console.log("query age by manufacturer");
+
+				let start = new Date();
+
+				let vq = ViewQuery.from("benchmark", "ageByManufacturer");
+
+				vq.stale(ViewQuery.Update.BEFORE);
+
+				bucket.query(vq, (err, results) => {
+					if (err) return reject(err);
+
+					let end = new Date();
+
+					console.log(`age by manufacturer: ${Math.round(results[0].value)}`);
+
+					console.log(`age by manufacturer in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
+
+					process.exit(0);
+				});
+
+			});
 
 		}, (err) => {
 			console.log(err);
