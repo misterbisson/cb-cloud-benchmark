@@ -1,6 +1,6 @@
 import Chance from "chance";
 import _ from "lodash";
-import fs from "fs";
+import fs from "fs-extra";
 
 export default function (num, dir, docs=600000, progress=new Progress()) {
 	let chance = new Chance();
