@@ -3,7 +3,7 @@ import del from "del";
 import fs from "fs-extra";
 import concat from "concat";
 
-export default function (original, to) {
+export default function (original, to, dir) {
 	if (original < to) throw new Error("original is less then to");
 	if (original === to) return;
 
@@ -17,14 +17,14 @@ export default function (original, to) {
 		let concatenation = [];
 
 		_.forEach(_.range(0, num), () => {
-			concatenation.push(`./data/generated_docs_${current++}.json`);
+			concatenation.push(`${dir}/generated_docs_${current++}.json`);
 		});
 
-		concatenations.push([concatenation, `./data/concatenation_docs_${i}.json`]);
+		concatenations.push([concatenation, `${dir}/concatenation_docs_${i}.json`]);
 	});
 
 	_.forEach(_.range(0, remainder), (i) => {
-		concatenations[i][0].push(`./data/generated_docs_${current++}.json`);
+		concatenations[i][0].push(`${dir}/generated_docs_${current++}.json`);
 	});
 
 	concatenations = concatenations.map((concatenation) => {
@@ -43,7 +43,7 @@ export default function (original, to) {
 
 		return new Promise((resolve, reject) => {
 
-			del(["data/generated_docs_*.json"], (err) => {
+			del(["${dir}/generated_docs_*.json"], (err) => {
 				if (err) return reject(err);
 
 				resolve();
@@ -60,7 +60,7 @@ export default function (original, to) {
 
 			moves.push(new Promise((resolve, reject) => {
 
-				fs.move(`./data/concatenation_docs_${i}.json`, `./data/generated_docs_${i}.json`, (err) => {
+				fs.move(`${dir}/concatenation_docs_${i}.json`, `./data/generated_docs_${i}.json`, (err) => {
 					if (err) return reject(err);
 
 					resolve();
@@ -74,7 +74,7 @@ export default function (original, to) {
 		throw err;
 	}).then(() => {
 
-		del(["data/concatenation_docs_*.json"], (err) => {
+		del(["${dir}/concatenation_docs_*.json"], (err) => {
 			if (err) throw err;
 
 			console.log("completed");

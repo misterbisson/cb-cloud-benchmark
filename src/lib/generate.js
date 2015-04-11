@@ -2,7 +2,7 @@ import Chance from "chance";
 import _ from "lodash";
 import fs from "fs";
 
-export default function (num, docs=600000, progress=new Progress()) {
+export default function (num, dir, docs=600000, progress=new Progress()) {
 	let chance = new Chance();
 
 	let owners = [];
@@ -46,7 +46,7 @@ export default function (num, docs=600000, progress=new Progress()) {
 
 	owners = _.uniq(owners, "id");
 
-	fs.writeFile(`./data/generated_docs_${num}.json`, JSON.stringify({"owners": owners}), (err) => {
+	fs.writeFile(`${dir}/generated_docs_${num}.json`, JSON.stringify({"owners": owners}), (err) => {
 
 		if (err) return console.log(err);
 

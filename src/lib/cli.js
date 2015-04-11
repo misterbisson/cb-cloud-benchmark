@@ -142,6 +142,12 @@ export default function (cluster) {
 				"describe": "number of files to shrink the generated docs to",
 				"type": "number"
 			})
+			.option("d", {
+				"alias": "dir",
+				"default": "./data",
+				"describe": "directory to use",
+				"type": "string"
+			})
 			.option("c", {
 				"alias": "cluster",
 				"default": "couchbase://127.0.0.1",
@@ -156,10 +162,10 @@ export default function (cluster) {
 		switch (command) {
 			case "generate":
 
-				del(["data/generated_docs_*.json"], (err) => {
+				del(["${argv.dir}/generated_docs_*.json"], (err) => {
 					if (err) throw err;
 
-					spinCluster(cluster, argv.process, new ProgressProgressBar(argv.process, "generate test docs"), {
+					spinCluster(cluster, argv.dir, argv.process, new ProgressProgressBar(argv.process, "generate test docs"), {
 						"name": "generate",
 						"options": {
 							"docs": argv.num
@@ -172,10 +178,10 @@ export default function (cluster) {
 				setup(argv.cluster);
 				break;
 			case "shrink":
-				shrink(argv.process, argv.to);
+				shrink(argv.process, argv.to, argv.dir);
 				break;
 			case "run":
-				spinCluster(cluster, argv.process, new ProgressProgressBar(argv.process, "load test docs"), {
+				spinCluster(cluster, argv.process, argv.dir, new ProgressProgressBar(argv.process, "load test docs"), {
 					"name": "run",
 					"options": {
 						"cluster": argv.cluster

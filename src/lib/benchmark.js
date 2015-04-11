@@ -4,10 +4,10 @@ import _ from "lodash";
 
 import connect from "./connect";
 
-export default function (num, uri, loadProgress) {
+export default function (num, uri, dir, loadProgress) {
 	let bucket = connect(uri);
 
-	let stream = fs.createReadStream(`./data/generated_docs_${num}.json`, {"encoding": "utf8"});
+	let stream = fs.createReadStream(`${dir}/generated_docs_${num}.json`, {"encoding": "utf8"});
 	let parser = JSONStream.parse("owners.*");
 
 	stream.pipe(parser);
