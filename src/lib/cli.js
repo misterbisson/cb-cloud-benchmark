@@ -76,7 +76,7 @@ class WorkerProgress extends Progress {
 	}
 }
 
-function spinCluster(cluster, num, progress, command) {
+function spinCluster(cluster, dir, num, progress, command) {
 	let numWorkers = 0;
 
 	_.forEach(_.range(1, num + 1), (i) => {
@@ -85,6 +85,7 @@ function spinCluster(cluster, num, progress, command) {
 		numWorkers++;
 		worker.send({
 			"num": i,
+			"dir": dir,
 			"command": command
 		});
 	});
@@ -145,7 +146,7 @@ export default function (cluster) {
 			})
 			.option("d", {
 				"alias": "dir",
-				"default": path.resolve(__dirname, "./data"),
+				"default": path.resolve(__dirname, "../../data"),
 				"describe": "directory to use",
 				"type": "string"
 			})
@@ -163,7 +164,7 @@ export default function (cluster) {
 		switch (command) {
 			case "generate":
 
-				del(["${argv.dir}/generated_docs_*.json"], (err) => {
+				del([`${argv.dir}/generated_docs_*.json`], (err) => {
 					if (err) throw err;
 
 					spinCluster(cluster, argv.dir, argv.process, new ProgressProgressBar(argv.process, "generate test docs"), {
@@ -182,7 +183,7 @@ export default function (cluster) {
 				shrink(argv.process, argv.to, argv.dir);
 				break;
 			case "run":
-				spinCluster(cluster, argv.process, argv.dir, new ProgressProgressBar(argv.process, "load test docs"), {
+				spinCluster(cluster, argv.dir, argv.process, new ProgressProgressBar(argv.process, "load test docs"), {
 					"name": "run",
 					"options": {
 						"cluster": argv.cluster
@@ -202,10 +203,10 @@ export default function (cluster) {
 			switch (command.name) {
 
 				case "generate":
-					generate(num, command.options.docs, new WorkerProgress(num));
+					generate(num, message.dir, command.options.docs, new WorkerProgress(num));
 					break;
 				case "run":
-					benchmark(num, command.options.cluster, new WorkerProgress(num));
+					benchmark(num, message.dir, command.options.cluster, new WorkerProgress(num));
 			}
 		});
 

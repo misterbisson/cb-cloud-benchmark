@@ -5,7 +5,10 @@ import concat from "concat";
 
 export default function (original, to, dir) {
 	if (original < to) throw new Error("original is less then to");
-	if (original === to) return;
+	if (original === to) {
+		console.log("completed");
+		return;
+	}
 
 	let concatenations = [];
 	let num = Math.floor(original / to);
