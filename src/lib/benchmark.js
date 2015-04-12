@@ -5,8 +5,10 @@ import { ViewQuery } from "couchbase";
 
 import connect from "./connect";
 
-export default function (num, dir, uri, loadProgress) {
+export function load(num, dir, uri, loadProgress) {
 	let bucket = connect(uri);
+
+	bucket.operationTimeout = 7500;
 
 	let stream = fs.createReadStream(`${dir}/generated_docs_${num}.json`, {"encoding": "utf8"});
 	let parser = JSONStream.parse("owners.*");
@@ -68,96 +70,100 @@ export default function (num, dir, uri, loadProgress) {
 
 			loadProgress.end();
 
-			return new Promise((resolve, reject) => {
+			process.exit(0);
 
-				console.log("query people with SUVs");
-
-				let start = new Date();
-
-				let vq = ViewQuery.from("benchmark", "withSUVs");
-
-				vq.stale(ViewQuery.Update.BEFORE);
-
-				bucket.query(vq, (err, results) => {
-					if (err) return reject(err);
-
-					let end = new Date();
-
-					console.log(`people with SUVs in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
-
-					return resolve(results);
-				});
-
-			});
-
-		}, (err) => {
-			console.log(err);
-			throw err;
-		}).then(() => {
-
-			loadProgress.end();
-
-			return new Promise((resolve, reject) => {
-
-				console.log("query number of convertibles");
-
-				let start = new Date();
-
-				let vq = ViewQuery.from("benchmark", "numConvertibles");
-
-				vq.stale(ViewQuery.Update.BEFORE);
-
-				bucket.query(vq, (err, results) => {
-					if (err) return reject(err);
-
-					let end = new Date();
-
-					console.log(`number of convertibles: ${results[0].value}`);
-
-					console.log(`number of convertibles in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
-
-					return resolve(results);
-				});
-
-			});
-
-		}, (err) => {
-			console.log(err);
-			throw err;
-		}).then(() => {
-
-			loadProgress.end();
-
-			return new Promise((resolve, reject) => {
-
-				console.log("query age by manufacturer");
-
-				let start = new Date();
-
-				let vq = ViewQuery.from("benchmark", "ageByManufacturer");
-
-				vq.stale(ViewQuery.Update.BEFORE);
-
-				bucket.query(vq, (err, results) => {
-					if (err) return reject(err);
-
-					let end = new Date();
-
-					console.log(`age by manufacturer: ${Math.round(results[0].value)}`);
-
-					console.log(`age by manufacturer in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
-
-					process.exit(0);
-				});
-
-			});
-
-		}, (err) => {
-			console.log(err);
-			throw err;
-		}).catch((err) => {
-			console.log(err);
-			throw err;
 		});
 	});
 }
+
+export function query(uri) {
+	let bucket = connect(uri);
+
+	bucket.operationTimeout = 7500;
+
+	return new Promise((resolve, reject) => {
+
+		console.log("query people with SUVs");
+
+		let start = new Date();
+
+		let vq = ViewQuery.from("benchmark", "withSUVs");
+
+		vq.stale(ViewQuery.Update.BEFORE);
+
+		bucket.query(vq, (err, results) => {
+			if (err) return reject(err);
+
+			let end = new Date();
+
+			console.log(`people with SUVs in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
+
+			return resolve(results);
+		});
+
+	}).then(() => {
+
+		return new Promise((resolve, reject) => {
+
+			console.log("query number of convertibles");
+
+			let start = new Date();
+
+			let vq = ViewQuery.from("benchmark", "numConvertibles");
+
+			vq.stale(ViewQuery.Update.BEFORE);
+
+			bucket.query(vq, (err, results) => {
+				if (err) return reject(err);
+
+				let end = new Date();
+
+				console.log(`number of convertibles: ${results[0].value}`);
+
+				console.log(`number of convertibles in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
+
+				return resolve(results);
+			});
+
+		});
+
+	}, (err) => {
+		console.log(err);
+		throw err;
+	}).then(() => {
+
+		return new Promise((resolve, reject) => {
+
+			console.log("query age by manufacturer");
+
+			let start = new Date();
+
+			let vq = ViewQuery.from("benchmark", "ageByManufacturer");
+
+			vq.stale(ViewQuery.Update.BEFORE);
+
+			bucket.query(vq, (err, results) => {
+				if (err) return reject(err);
+
+				let end = new Date();
+
+				console.log(`age by manufacturer: ${Math.round(results[0].value)}`);
+
+				console.log(`age by manufacturer in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
+
+				resolve();
+			});
+
+		});
+
+	}, (err) => {
+		console.log(err);
+		throw err;
+	});
+}
+
+export default {
+	"load": load,
+	"query": query
+}
+

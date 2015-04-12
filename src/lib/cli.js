@@ -76,7 +76,9 @@ class WorkerProgress extends Progress {
 	}
 }
 
-function spinCluster(cluster, dir, num, progress, command) {
+function spinCluster(cluster, dir, num, progress, command, completed) {
+	completed = completed || function () { process.exit(0); };
+
 	let numWorkers = 0;
 
 	_.forEach(_.range(1, num + 1), (i) => {
@@ -113,7 +115,7 @@ function spinCluster(cluster, dir, num, progress, command) {
 		if (numWorkers < 1) {
 			console.log("completed");
 
-			process.exit(0);
+			completed();
 		}
 	});
 }
@@ -188,6 +190,14 @@ export default function (cluster) {
 					"options": {
 						"cluster": argv.cluster
 					}
+				}, () => {
+					benchmark.query(argv.cluster).then(() => process.exit(0), (err) => {
+						console.log(err);
+						throw err;
+					}).catch((err) => {
+						console.log(err);
+						throw err;
+					});
 				});
 				break;
 			default:
@@ -206,7 +216,7 @@ export default function (cluster) {
 					generate(num, message.dir, command.options.docs, new WorkerProgress(num));
 					break;
 				case "run":
-					benchmark(num, message.dir, command.options.cluster, new WorkerProgress(num));
+					benchmark.load(num, message.dir, command.options.cluster, new WorkerProgress(num));
 			}
 		});
 
