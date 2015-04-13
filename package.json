@@ -1,14 +1,13 @@
 {
   "name": "cb-cloud-benchmark",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Cloud Benchmark which loads and accesses data from a Couchbase cluster",
   "main": "index.js",
   "scripts": {
     "eslint": "eslint .",
     "babel": "babel src --out-dir dist --source-maps",
-    "build": "npm run babel",
     "clean": "rm -rvf dist",
-    "test": "npm run build && npm run eslint",
+    "test": "npm run babel && npm run eslint",
     "start": "node ./dist/bin/cloud-benchmark",
     "prepublish": "npm run clean && npm run babel"
   },

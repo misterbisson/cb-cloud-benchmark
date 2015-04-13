@@ -2,7 +2,7 @@ import Chance from "chance";
 import _ from "lodash";
 import fs from "fs-extra";
 
-export default function (num, dir, docs=600000, progress=new Progress()) {
+export default function (num, series, dir, docs, progress=new Progress()) {
 	let chance = new Chance();
 
 	let owners = [];
@@ -49,7 +49,9 @@ export default function (num, dir, docs=600000, progress=new Progress()) {
 	fs.ensureDir(dir, function (err) {
 		if (err) return console.log(err);
 
-		fs.writeFile(`${dir}/generated_docs_${num}.json`, JSON.stringify({"owners": owners}), (err) => {
+		console.log(`saving to: ${dir}/generated_docs_${num}_${series}.json`);
+
+		fs.writeFile(`${dir}/generated_docs_${num}_${series}.json`, JSON.stringify({"owners": owners}), (err) => {
 			if (err) return console.log(err);
 
 			progress.end();

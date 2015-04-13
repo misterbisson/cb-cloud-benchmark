@@ -5,28 +5,20 @@ import { ViewQuery } from "couchbase";
 
 import connect from "./connect";
 
-export function load(num, dir, uri, loadProgress) {
+export function load(num, series, dir, uri, loadProgress) {
 	let bucket = connect(uri);
 
 	bucket.operationTimeout = 7500;
 
-	let stream = fs.createReadStream(`${dir}/generated_docs_${num}.json`, {"encoding": "utf8"});
+	let stream = fs.createReadStream(`${dir}/generated_docs_${num}_${series}.json`, {"encoding": "utf8"});
 	let parser = JSONStream.parse("owners.*");
 
 	stream.pipe(parser);
 
 	let owners = [];
-	let loaded = 0;
-	let loadedTotal = 0;
 
 	parser.on("data", (owner) => {
 		owners.push(owner);
-		loaded++;
-		if (loaded >= 1000) {
-			loadedTotal += loaded;
-			console.log(`${num}: loaded ${loadedTotal} docs`);
-			loaded = 0;
-		}
 	});
 
 	parser.on("end", () => {
@@ -50,7 +42,7 @@ export function load(num, dir, uri, loadProgress) {
 						return new Promise((resolve, reject) => {
 
 							bucket.insert(owner.id, owner, (err) => {
-								if (err) {
+								if (err && err.code !== 12) {
 									console.log(err);
 									return reject(err);
 								}
@@ -104,7 +96,9 @@ export function query(uri) {
 
 			let end = new Date();
 
-			console.log(`people with SUVs in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
+			console.log(`people with SUVs: ${results.length}`);
+
+			console.log(`people with SUVs in: ${(end.getTime() - start.getTime())}ms`);
 
 			return resolve(results);
 		});
@@ -128,7 +122,7 @@ export function query(uri) {
 
 				console.log(`number of convertibles: ${results[0].value}`);
 
-				console.log(`number of convertibles in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
+				console.log(`number of convertibles in: ${(end.getTime() - start.getTime())}ms`);
 
 				return resolve(results);
 			});
@@ -157,7 +151,7 @@ export function query(uri) {
 
 				console.log(`average age: ${Math.round(results[0].value)}`);
 
-				console.log(`average age: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
+				console.log(`average age: ${(end.getTime() - start.getTime())}ms`);
 
 				resolve();
 			});
@@ -174,4 +168,3 @@ export default {
 	"load": load,
 	"query": query
 }
-

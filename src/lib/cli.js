@@ -8,7 +8,6 @@ import { install } from "source-map-support";
 import generate from "./generate";
 import Progress from "./progress";
 import setup from "./setup";
-import shrink from "./shrink";
 import benchmark from "./benchmark";
 
 install();
@@ -76,47 +75,50 @@ class WorkerProgress extends Progress {
 	}
 }
 
-function spinCluster(cluster, dir, num, progress, command, completed) {
-	completed = completed || function () { process.exit(0); };
+function spinCluster(cluster, dir, num, series, progress, command) {
 
-	let numWorkers = 0;
+	return new Promise((resolve) => {
 
-	_.forEach(_.range(1, num + 1), (i) => {
-		let worker = cluster.fork();
+		let numWorkers = 0;
 
-		numWorkers++;
-		worker.send({
-			"num": i,
-			"dir": dir,
-			"command": command
-		});
-	});
+		_.forEach(_.range(1, num + 1), (i) => {
+			let worker = cluster.fork();
 
-	if (progress) {
-		Object.keys(cluster.workers).forEach((id) => {
-			cluster.workers[id].on("message", (message) => {
-
-				switch (message.type) {
-					case "start":
-						progress.start(message.total);
-						break;
-					case "completed":
-						progress.completed();
-						break;
-				}
-
+			numWorkers++;
+			worker.send({
+				"num": i,
+				"series": series,
+				"dir": dir,
+				"command": command
 			});
 		});
-	}
 
-	cluster.on("exit", () => {
-		numWorkers--;
+		if (progress) {
+			Object.keys(cluster.workers).forEach((id) => {
+				cluster.workers[id].on("message", (message) => {
 
-		if (numWorkers < 1) {
-			console.log("completed");
+					switch (message.type) {
+						case "start":
+							progress.start(message.total);
+							break;
+						case "completed":
+							progress.completed();
+							break;
+					}
 
-			completed();
+				});
+			});
 		}
+
+		cluster.on("exit", () => {
+			numWorkers--;
+
+			if (numWorkers === 0) {
+				console.log(`completed series ${series}`);
+
+				resolve();
+			}
+		});
 	});
 }
 
@@ -125,25 +127,24 @@ export default function (cluster) {
 	if (cluster.isMaster) {
 		let argv = yargs.usage("cloud-benchmark <command> [options]")
 			.command("generate", "generate test data")
-			.command("shrink", "concatenate generated files for lower process number in run")
 			.command("setup", "setup view models")
 			.command("run", "run tests")
 			.option("n", {
 				"alias": "num",
-				"default": 600000,
+				"default": 150000,
 				"describe": "number of docs to generate per process (generate only)",
 				"type": "number"
 			})
 			.option("p", {
 				"alias": "process",
 				"default": 2,
-				"describe": "number of processes to use - must have generated docs for at least that many",
+				"describe": "number of processes to use",
 				"type": "number"
 			})
-			.option("t", {
-				"alias": "to",
-				"default": 2,
-				"describe": "number of files to shrink the generated docs to",
+			.option("s", {
+				"alias": "series",
+				"default": 8,
+				"describe": "number of times to run the import",
 				"type": "number"
 			})
 			.option("d", {
@@ -166,14 +167,26 @@ export default function (cluster) {
 		switch (command) {
 			case "generate":
 
-				del([`${argv.dir}/generated_docs_*.json`], (err) => {
+				del([`${argv.dir}/generated_docs_*_*.json`], (err) => {
 					if (err) throw err;
 
-					spinCluster(cluster, argv.dir, argv.process, new ProgressProgressBar(argv.process, "generate test docs"), {
-						"name": "generate",
-						"options": {
-							"docs": argv.num
-						}
+					let generateSeries = Promise.resolve();
+
+					_.forEach(_.range(1, argv.series + 1), (seriesIndex) => {
+
+						generateSeries = generateSeries.then(() => {
+
+							return spinCluster(cluster, argv.dir, argv.process, seriesIndex, new ProgressProgressBar(argv.process, `series ${seriesIndex}: generate test docs`), {
+								"name": "generate",
+								"options": {
+									"docs": argv.num
+								}
+							});
+						});
+					});
+
+					generateSeries.then(() => {
+						console.log("completed");
 					});
 				});
 
@@ -181,23 +194,39 @@ export default function (cluster) {
 			case "setup":
 				setup(argv.cluster);
 				break;
-			case "shrink":
-				shrink(argv.process, argv.to, argv.dir);
-				break;
 			case "run":
-				spinCluster(cluster, argv.dir, argv.process, new ProgressProgressBar(argv.process, "load test docs"), {
-					"name": "run",
-					"options": {
-						"cluster": argv.cluster
-					}
-				}, () => {
-					benchmark.query(argv.cluster).then(() => process.exit(0), (err) => {
-						console.log(err);
-						throw err;
-					}).catch((err) => {
-						console.log(err);
-						throw err;
+
+				let clusterSeries = Promise.resolve();
+
+				_.forEach(_.range(1, argv.series + 1), (seriesIndex) => {
+
+					clusterSeries = clusterSeries.then(() => {
+
+						return spinCluster(cluster, argv.dir, argv.process, seriesIndex, new ProgressProgressBar(argv.process, `series ${seriesIndex}: load test docs`), {
+							"name": "run",
+							"options": {
+								"cluster": argv.cluster
+							}
+						});
 					});
+				});
+
+
+				clusterSeries.then(() => {
+					return benchmark.query(argv.cluster);
+				}).then(() => {
+					return new Promise((resolve) => {
+						console.log("waiting 60 seconds to run queries again");
+						setTimeout(resolve, 60000);
+					});
+				}).then(() => {
+					return benchmark.query(argv.cluster);
+				}).then(() => process.exit(0), (err) => {
+					console.log(err);
+					throw err;
+				}).catch((err) => {
+					console.log(err);
+					throw err;
 				});
 				break;
 			default:
@@ -213,10 +242,10 @@ export default function (cluster) {
 			switch (command.name) {
 
 				case "generate":
-					generate(num, message.dir, command.options.docs, new WorkerProgress(num));
+					generate(num, message.series, message.dir, command.options.docs, new WorkerProgress(num));
 					break;
 				case "run":
-					benchmark.load(num, message.dir, command.options.cluster, new WorkerProgress(num));
+					benchmark.load(num, message.series, message.dir, command.options.cluster, new WorkerProgress(num));
 			}
 		});
 
