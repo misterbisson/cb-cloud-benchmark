@@ -134,11 +134,11 @@ export function query(uri) {
 
 		return new Promise((resolve, reject) => {
 
-			console.log("query age by manufacturer");
+			console.log("query average age");
 
 			let start = new Date();
 
-			let vq = ViewQuery.from("benchmark", "ageByManufacturer");
+			let vq = ViewQuery.from("benchmark", "averageAge");
 
 			vq.stale(ViewQuery.Update.BEFORE);
 

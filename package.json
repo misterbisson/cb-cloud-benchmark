@@ -1,6 +1,6 @@
 {
   "name": "cb-cloud-benchmark",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Cloud Benchmark which loads and accesses data from a Couchbase cluster",
   "main": "index.js",
   "scripts": {
