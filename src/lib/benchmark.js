@@ -16,9 +16,17 @@ export function load(num, dir, uri, loadProgress) {
 	stream.pipe(parser);
 
 	let owners = [];
+	let loaded = 0;
+	let loadedTotal = 0;
 
 	parser.on("data", (owner) => {
 		owners.push(owner);
+		loaded++;
+		if (loaded >= 1000) {
+			loadedTotal += loaded;
+			console.log(`${num}: loaded ${loadedTotal} docs`);
+			loaded = 0;
+		}
 	});
 
 	parser.on("end", () => {
