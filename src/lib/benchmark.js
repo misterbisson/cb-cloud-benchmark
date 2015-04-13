@@ -147,9 +147,9 @@ export function query(uri) {
 
 				let end = new Date();
 
-				console.log(`age by manufacturer: ${Math.round(results[0].value)}`);
+				console.log(`average age: ${Math.round(results[0].value)}`);
 
-				console.log(`age by manufacturer in: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
+				console.log(`average age: ${Math.round((end.getTime() - start.getTime()) / 10) / 100}s`);
 
 				resolve();
 			});

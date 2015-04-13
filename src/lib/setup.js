@@ -21,7 +21,7 @@ function (doc, meta) {
 }`,
 			"reduce": "_count"
 		},
-		"ageByManufacturer": {
+		"averageAge": {
 			"map": `
 function (doc, meta) {
 	emit(doc.make, doc.age);
