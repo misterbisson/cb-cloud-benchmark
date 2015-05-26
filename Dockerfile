@@ -1,4 +1,4 @@
-FROM iojs:1.6.4
+FROM node:0.12.4
 
 RUN npm install -g cb-cloud-benchmark
 
