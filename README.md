@@ -4,8 +4,13 @@ A module to benchmark various clouds by loading and accessing a large dataset in
 
 ## Using
 
+This expects a Couchbase bucket named `benchmark`.
+
+It can be run in a variety of environments:
+
 - On [Joyent Triton](https://www.joyent.com/) in Docker containers: See [clustered-couchbase-in-containers](https://github.com/misterbisson/clustered-couchbase-in-containers) repo.
 - On [Joyent Triton](https://www.joyent.com/) in an infrastructure container: documentation to be developed.
+- As a generic Docker container `docker run -e $COUCHBASE_HOST -it misterbisson/couchbase-cloud-benchmark`.
 
 
 ## Building
