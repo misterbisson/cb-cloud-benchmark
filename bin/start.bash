@@ -1,9 +1,11 @@
 #!/bin/bash
 
+echo "Uncompressing source data..."
 cd /data && ./expand.sh
 
-# Install Couchbase Views
-# cloud-benchmark setup -c couchbase://$couchbase_host
 
-# Run Benchmark
-# cloud-benchmark run -d /data -c couchbase://$couchbase_host
+echo "Setting up views..."
+cloud-benchmark setup -c couchbase://$COUCHBASE_HOST
+
+echo "Executing benchmarks..."
+cloud-benchmark run -d /data -c couchbase://$COUCHBASE_HOST

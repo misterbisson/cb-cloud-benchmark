@@ -6,4 +6,4 @@ ADD ./bin /bin
 
 ADD ./data /data
 
-CMD [ "/bin/bash -c \"while true; do sleep 1; done\"" ]
+CMD [ "/bin/bash /bin/start.bash" ]
