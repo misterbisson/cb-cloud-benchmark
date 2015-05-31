@@ -5,7 +5,7 @@ cd /data && ./expand.sh
 
 echo "Creating the bucket"
 BUCKET_RAM=100
-curl -i -X POST -u Administrator:password -d name=newbucket -d ramQuotaMB=$BUCKET_RAM -d authType=none -d proxyPort=11239 -d replicaNumber=1 http://$COUCHBASE_HOST:8091/pools/default/buckets
+curl -i -X POST -u Administrator:password -d name=newbucket -d ramQuotaMB=$BUCKET_RAM -d authType=sasl -d saslPassword='' -d replicaNumber=1 http://$COUCHBASE_HOST:8091/pools/default/buckets
 
 echo "Setting up views..."
 cloud-benchmark setup -c couchbase://$COUCHBASE_HOST
