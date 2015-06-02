@@ -16,11 +16,12 @@ while [ $CLUSTERFOUND != 1 ]; do
     then
         let CLUSTERFOUND=1
     else
-        sleep 3
+        sleep 29
     fi
 done
+sleep 3
 
-
+echo
 echo '#'
 echo '# Setting up views'
 echo "# cloud-benchmark setup -c couchbase://$CLUSTERIP"
