@@ -3,6 +3,8 @@
 echo "Uncompressing source data..."
 cd /data && ./expand.sh
 
+sleep 67
+
 echo '#'
 echo '# Looking for the Couchbase cluster'
 echo '#'
@@ -16,7 +18,7 @@ while [ $CLUSTERFOUND != 1 ]; do
     then
         let CLUSTERFOUND=1
     else
-        sleep 29
+        sleep 227
     fi
 done
 sleep 3
