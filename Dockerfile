@@ -1,5 +1,9 @@
-FROM iojs:1.6.4
+FROM node:0.12.4
 
-RUN npm install -g cb-cloud-benchmark
+RUN npm install -g cb-cloud-benchmark json
 
-CMD [ "/bin/bash -c \"while true; do sleep 1; done\"" ]
+ADD ./bin/start.bash /bin/start.bash
+
+ADD ./data /data
+
+CMD [ "/bin/bash /bin/start.bash" ]
