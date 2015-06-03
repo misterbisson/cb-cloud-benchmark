@@ -3,11 +3,18 @@
 echo "Uncompressing source data..."
 cd /data && ./expand.sh
 
-sleep 67
-
 echo '#'
 echo '# Looking for the Couchbase cluster'
 echo '#'
+
+CLUSTERFOUND=0
+while [ "$CLUSTERFOUND" -lt 3 ]; do
+    echo -n '.'
+    sleep 19
+
+    CLUSTERFOUND=$(curl -sL http://consul:8500/v1/catalog/service/couchbase | json -aH ServiceAddress | wc -l)
+done
+sleep 3
 
 CLUSTERFOUND=0
 while [ $CLUSTERFOUND != 1 ]; do
@@ -18,7 +25,7 @@ while [ $CLUSTERFOUND != 1 ]; do
     then
         let CLUSTERFOUND=1
     else
-        sleep 227
+        sleep 3
     fi
 done
 sleep 3
